@@ -189,29 +189,10 @@ BETTER_AUTH_SECRET="secure-production-secret-at-least-32-chars"
 BETTER_AUTH_URL="https://yourdomain.com"
 ```
 
-## Claude Code / Chief Agent Framework
-
-This template ships with a **[Chief Agent Framework](https://github.com/thaitype/chief-agent-framework)** for AI-driven development using [Claude Code](https://claude.ai/code). It includes:
-
-- **`.chief/`** — Planning, milestones, task specs, and rules for autonomous agent execution
-- **`CLAUDE.md`** — Project rules, architecture context, and development commands that Claude reads
-
-If you use Claude Code, the chief-agent will read these files to plan and execute work autonomously.
-
-If you don't use Claude Code or prefer your own setup, remove them:
-
-```bash
-rm -rf .chief .claude
-rm CLAUDE.md
-# Optionally create your own CLAUDE.md with your project context
-```
-
-The application code is fully independent of the framework.
-
 ## Documentation
 
 - **[Architecture Guide](docs/ARCHITECTURE.md)** — Module structure, DI patterns, type safety chain
-- **[CLAUDE.md](CLAUDE.md)** — AI development guidelines and chief-agent framework
+- **[AGENTS.md](AGENTS.md)** — AI development guidelines and chief-agent framework
 
 ## License
 
