@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "chief-upgrade": {
+      "source": "thaitype/chief",
+      "sourceType": "github",
+      "computedHash": "ec810115cec0370ded49d340cf253c11b9718eeaac7f5fc71d7b544e49b1a63d"
+    },
     "prisma-cli": {
       "source": "prisma/skills",
       "sourceType": "github",
