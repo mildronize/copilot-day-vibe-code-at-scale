@@ -1,0 +1,79 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.value }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: image
+        shell: bash
+        run: echo "value=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push container image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.image.outputs.value }}
+
+  migrate-database:
+    name: Run database migration
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run Prisma migrations
+        run: bunx prisma migrate deploy
+
+  deploy-container-app:
+    name: Deploy image to Azure Container App
+    runs-on: ubuntu-latest
+    needs:
+      - build-and-push
+      - migrate-database
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy latest image revision
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az containerapp update \
+              --name aca-copilot-vibe \
+              --resource-group rg-copilot-vibe \
+              --image ${{ needs.build-and-push.outputs.image }}
