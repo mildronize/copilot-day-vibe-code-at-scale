@@ -13,7 +13,10 @@ export type {
   DbTodoEntity,
   DbTodoInsert,
   DbTodoUpdate,
+  DbExpenseEntity,
+  DbExpenseInsert,
+  DbExpenseUpdate,
 } from '../db/schema';
 
 // Re-export domain model types for service layer
-export type { User, Todo } from '../db/schema';
+export type { User, Todo, Expense } from '../db/schema';

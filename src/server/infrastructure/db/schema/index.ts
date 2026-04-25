@@ -9,24 +9,28 @@
 // Schema tables
 export { user as users } from './user';
 export { todos, todosRelations } from './todo';
+export { expenses, expensesRelations, expenseCategoryEnum } from './expense';
 export { roles, userRoles } from './role';
 export { session, account, verification } from './auth';
 
 // Re-import for schema object
 import { user } from './user';
 import { todos, todosRelations } from './todo';
+import { expenses, expensesRelations } from './expense';
 import { roles, userRoles } from './role';
 import { session, account, verification } from './auth';
 
 // Database entity types (with database-specific fields)
 export type { DbUserEntity, DbUserInsert, DbUserUpdate } from './user';
 export type { DbTodoEntity, DbTodoInsert, DbTodoUpdate } from './todo';
+export type { DbExpenseEntity, DbExpenseInsert, DbExpenseUpdate } from './expense';
 export type { DbRoleEntity, DbRoleInsert, DbUserRoleEntity, DbUserRoleInsert } from './role';
 export type { AuthUser, AuthUserInsert, AuthSession, AuthSessionInsert, AuthAccount, AuthAccountInsert, AuthVerification, AuthVerificationInsert } from './auth';
 
 // Domain model types (for service layer - string-based IDs)
 export type { User } from './user';
 export type { Todo } from './todo';
+export type { Expense } from './expense';
 export type { Role } from './role';
 
 // Base types
@@ -37,6 +41,8 @@ export { baseFields } from './base';
 export const schema = {
   todos,
   todosRelations,
+  expenses,
+  expensesRelations,
   roles,
   userRoles,
   // Better Auth tables
