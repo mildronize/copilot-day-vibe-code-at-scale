@@ -14,7 +14,7 @@
 
 For this repository, use this order:
 
-1. Run Terraform manually first (creates `rg-copilot-vibe`, `aca-copilot-vibe`, PostgreSQL server/database).
+1. Run Terraform manually first (creates `rg-copilot-vibe`, `law-copilot-vibe`, `aca-copilot-vibe`, PostgreSQL server/database).
 2. Create service principal scoped to the created resource group.
 3. Create GitHub secrets (`AZURE_CREDENTIALS`, `DATABASE_URL`).
 4. Ensure Azure Container App can pull the GHCR image.
@@ -49,6 +49,7 @@ Terraform is intentionally manual in milestone 1.
    ```
 5. Confirm resources exist in Azure:
    - Resource group: `rg-copilot-vibe`
+   - Log Analytics Workspace: `law-copilot-vibe`
    - Container App: `aca-copilot-vibe`
    - PostgreSQL Flexible Server: `psqlflex-copilot-vibe`
    - PostgreSQL database: `app-copilot-vibe`
@@ -132,7 +133,7 @@ Stage order:
 ## Verification Checklist
 
 - [ ] Terraform apply completed successfully
-- [ ] `rg-copilot-vibe`, `aca-copilot-vibe`, `psqlflex-copilot-vibe`, and `app-copilot-vibe` exist
+- [ ] `rg-copilot-vibe`, `law-copilot-vibe`, `aca-copilot-vibe`, `psqlflex-copilot-vibe`, and `app-copilot-vibe` exist
 - [ ] `AZURE_CREDENTIALS` secret configured
 - [ ] `DATABASE_URL` secret configured
 - [ ] Push to `main` triggers workflow

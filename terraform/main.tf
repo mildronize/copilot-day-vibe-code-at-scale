@@ -4,6 +4,7 @@ locals {
 
   resource_group_name            = "rg-${local.suffix}"
   container_app_environment_name = "acae-${local.suffix}"
+  log_analytics_workspace_name   = "law-${local.suffix}"
   container_app_name             = "aca-${local.suffix}"
   container_app_target_port      = 3001
   postgresql_server_name         = "psqlflex-${local.suffix}"
@@ -18,10 +19,19 @@ resource "azurerm_resource_group" "main" {
   location = local.location
 }
 
-resource "azurerm_container_app_environment" "main" {
-  name                = local.container_app_environment_name
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = local.log_analytics_workspace_name
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_container_app_environment" "main" {
+  name                       = local.container_app_environment_name
+  location                   = local.location
+  resource_group_name        = azurerm_resource_group.main.name
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }
 
 resource "azurerm_container_app" "main" {
