@@ -1,4 +1,4 @@
-# Todo App Template - Next.js Enterprise Stack
+# Copilot Dev Day 2026 Demo Project
 
 > This project is using upstream from [thaitype-stack-mongodb-template](https://github.com/thaitype/thaitype-stack-mongodb-template), however, this will be a sql-based template with drizzleorm
 
