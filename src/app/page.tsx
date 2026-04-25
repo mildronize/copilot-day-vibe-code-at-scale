@@ -66,10 +66,10 @@ export default function Home() {
                 <IconChecklist size="3rem" color="var(--mantine-color-blue-6)" />
               </Group>
               <Title order={1} size="3rem" mb="md">
-                Todo App
+                Todo App 
               </Title>
               <Text size="xl" c="dimmed" mb="xl">
-                A simple and secure task management app
+                A simple and secure task management app, (Copilot Dev Day 2026 Demo Project)
               </Text>
             </div>
 
