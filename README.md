@@ -1,199 +1,600 @@
-# Todo App Template — SPA + Elysia + Prisma Stack
+# Todo App Template - Next.js Enterprise Stack
 
-A production-ready **Todo Application Template** built with React SPA, Elysia backend, and Prisma ORM. Implements module-based architecture with end-to-end type safety from database schema to frontend components. Serves as a foundation for building scalable full-stack applications with authentication, CRUD operations, and structured logging.
+> This project is using upstream from [thaitype-stack-mongodb-template](https://github.com/thaitype/thaitype-stack-mongodb-template), however, this will be a sql-based template with drizzleorm
 
-## Features
+A production-ready **Todo Application Template** built with Next.js 15, implementing enterprise-grade patterns and modern development practices. This template serves as a robust foundation for building scalable full-stack applications with authentication, CRUD operations, and real-time updates.
 
-- **Authentication** — Better Auth with email/password and session management
-- **Todo Management** — Full CRUD with filtering (all/pending/completed)
-- **End-to-End Type Safety** — Prisma schema drives types through the entire stack via Eden Treaty
-- **Module Architecture** — Domain-centric backend modules, feature-based frontend organization
-- **Auto-Generated Validation** — Prismabox generates TypeBox schemas from Prisma models
-- **Structured Logging** — Pino with pretty-print in dev, JSON in production
-- **Production Ready** — Single-server production mode with Dockerfile
+## ✨ Features
 
-## Tech Stack
+- 🔐 **Authentication System** - Better Auth with email/password
+- 📝 **Todo Management** - Full CRUD operations with real-time updates  
+- 🎨 **Modern UI** - Mantine components with responsive design
+- 🏗️ **Enterprise Architecture** - Entity-based repository pattern
+- 🔒 **Type Safety** - Full TypeScript with tRPC API layer
+- 📊 **Database** - PostgreSQL with Drizzle ORM
+- ⚡ **Performance** - Next.js 15 with App Router and React 19
+- 🎯 **Production Ready** - ESLint, Prettier, structured logging
+
+## Screenshot
+![](./docs/screenshot.png)
+
+## 🚀 Tech Stack
+
+### Core Framework
+- **[Next.js 15](https://nextjs.org)** - React framework with App Router
+- **[React 19](https://react.dev)** - Latest React with concurrent features
+- **[TypeScript](https://typescriptlang.org)** - Strict type safety
 
 ### Backend & API
-- **[Elysia](https://elysiajs.com)** — Type-safe web framework on Bun runtime
-- **[Prisma v7](https://prisma.io)** — ORM with SQLite (libsql adapter for Bun)
-- **[Better Auth](https://better-auth.com)** — Authentication library
-- **[Prismabox](https://github.com/prismabox/prismabox)** — Auto-generate TypeBox schemas from Prisma
-- **[Pino](https://getpino.io)** — Structured logging
+- **[tRPC](https://trpc.io)** - End-to-end typesafe APIs
+- **[PostgreSQL](https://postgresql.org)** - Relational database
+- **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM with SQL-like syntax
+- **[Better Auth](https://www.better-auth.com)** - Modern authentication library
+- **[Zod](https://zod.dev)** - TypeScript-first schema validation
 
 ### Frontend & UI
-- **[React 19](https://react.dev)** — UI library with Vite bundler
-- **[TanStack Router](https://tanstack.com/router)** — File-based routing
-- **[Eden Treaty](https://elysiajs.com/eden)** — Type-safe RPC client for Elysia
-- **[React Query](https://tanstack.com/query)** — Data fetching and cache management
-- **[shadcn/ui](https://ui.shadcn.com)** — Component library on Radix + Tailwind CSS v4
+- **[Mantine](https://mantine.dev)** - React components library
+- **[Tailwind CSS](https://tailwindcss.com)** - Utility-first CSS framework
+- **[@tabler/icons-react](https://tabler-icons.io)** - Icon library
 
-## Architecture
+### Development Tools
+- **[ESLint](https://eslint.org)** - Code linting
+- **[Prettier](https://prettier.io)** - Code formatting  
+- **[Pino](https://getpino.io)** - Structured logging
 
-This template implements a **Module-Based Architecture** with a type safety chain:
+## 🏗️ Architecture
 
-```
-prisma/schema.prisma (single source of truth)
-  -> Prisma Client (TypeScript types)
-  -> Prismabox (TypeBox validation schemas)
-  -> Elysia routes (body/response validation)
-  -> Eden Treaty (type-safe frontend RPC)
-  -> React Query hooks (typed data fetching)
-```
-
-### Project Structure
+This template implements an **Entity-Based Repository Architecture** with strict separation of concerns:
 
 ```
-server/                            # Backend
-  index.ts                         # Composition root — mounts modules, starts server
-  context/app-context.ts           # DI container factory
-  lib/                             # Auth config, Prisma client, auth plugin
-  infrastructure/logging/          # ILogger, PinoLogger, factory
-  modules/
-    todo/                          # Domain module
-      todo.repository.ts           # Interface + Prisma implementation
-      todo.service.ts              # Business logic
-      todo.routes.ts               # Elysia route plugin
-      todo.errors.ts               # Domain errors
-
-app/                               # Frontend (Vite root)
-  routes/                          # TanStack Router (thin, imports from features)
-  features/
-    todo/                          # Feature module
-      components/                  # TodoList, TodoItem, AddTodoForm
-      hooks/useTodos.ts            # React Query + Eden hooks
-  components/                      # Shared: Header, ThemeToggle, ui/ (shadcn)
-  lib/                             # Eden client, auth client, query client
-
-prisma/schema.prisma               # Database schema + prismabox generator
-generated/                         # Auto-generated Prisma client + TypeBox schemas
+src/
+├── app/                    # Next.js App Router
+│   ├── _components/        # UI components
+│   ├── api/trpc/          # tRPC API routes  
+│   └── (auth pages)       # Login, register, profile
+├── server/
+│   ├── api/               # tRPC routers and procedures
+│   ├── domain/            # Business domain layer
+│   │   ├── models/        # Domain interfaces (string IDs)
+│   │   └── repositories/  # Repository interfaces
+│   ├── infrastructure/    # Data access layer
+│   │   ├── entities/      # Database entities (ObjectIds)
+│   │   └── repositories/  # Repository implementations
+│   ├── services/          # Business logic (database-agnostic)
+│   └── lib/               # Shared utilities
+└── trpc/                  # Client-side tRPC setup
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation including patterns, conventions, and guides for adding new modules.
+### Key Patterns
+- **Entity-First Design**: All types derive from database entities
+- **Domain-Driven Services**: Business logic with string-based IDs  
+- **Type-Safe Validation**: Zod schemas with `matches<T>()` utility
+- **Native Features**: Drizzle's built-in UUID and timestamp management
+- **Structured Logging**: Request tracing and error context
 
-## Quick Start
+## 🚦 Quick Start
 
 ### Prerequisites
-
-- [Bun](https://bun.sh/) v1.3+
+- **Node.js 18+** 
+- **pnpm** (recommended) or npm
+- **Docker & Docker Compose** (recommended for local development)
+- **PostgreSQL** instance (local, cloud, or via Docker)
 
 ### 1. Clone and Install
-
 ```bash
 git clone <repository-url> my-todo-app
 cd my-todo-app
-bun install
+pnpm install
 ```
 
-### 2. Environment Setup
+### 2. Choose Development Environment
 
+#### Option A: Docker Development (Recommended)
+
+1. **Start Services**
+   ```bash
+   # Start PostgreSQL and Drizzle Gateway containers
+   docker-compose up -d
+   ```
+
+2. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   The `.env.example` is pre-configured for Docker development:
+   ```env
+   # Database (connects to Docker container via localhost port mapping)
+   DATABASE_URL="postgresql://devuser:devpass@localhost:5432/devdb"
+   
+   # Authentication
+   BETTER_AUTH_SECRET="your-secret-key-change-in-production"
+   NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
+   
+   # App Configuration  
+   NODE_ENV="development"
+   PORT="3000"
+   ```
+
+#### Option B: Local PostgreSQL
+
+If you prefer to use a local PostgreSQL installation:
+
+1. **Create Database**
+   ```bash
+   createdb devdb
+   ```
+
+2. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Update your `.env` file with your local PostgreSQL credentials:
+   ```env
+   DATABASE_URL="postgresql://your-username:your-password@localhost:5432/devdb"
+   ```
+
+### 3. Database Setup
 ```bash
-cp .env.example .env
-```
+# Generate migration files from schema
+pnpm db:generate
 
-Configure `.env`:
+# Apply migrations to create database tables
+pnpm db:migrate
 
-```env
-DATABASE_URL="file:./dev.db"
-BETTER_AUTH_SECRET="your-secret-key-here"
-BETTER_AUTH_URL="http://localhost:3001"
-```
-
-### 3. Set Up Database
-
-```bash
-bun run db:push
+# Seed the database with sample data (optional)
+pnpm db:seed
 ```
 
 ### 4. Start Development
-
 ```bash
-bun run dev
+pnpm dev
 ```
 
-This starts both frontend (http://localhost:3000) and backend (http://localhost:3001) concurrently. Sign up, then start adding todos.
+Visit [http://localhost:3000](http://localhost:3000) to see your app!
 
-## Development Commands
+## 🗄️ Database Setup Guide
+
+### Understanding Database Commands
+
+This template uses **Drizzle ORM** with **PostgreSQL**. Here's the recommended workflow:
+
+#### 1. Migration-Based Workflow (Recommended for Production)
+```bash
+# 1. Generate migration files from your schema changes
+pnpm db:generate
+
+# 2. Review generated migrations in ./drizzle/ directory
+# 3. Apply migrations to database
+pnpm db:migrate
+
+# 4. Seed with sample data (optional)
+pnpm db:seed
+```
+
+#### 2. Push Workflow (Development Only)
+```bash
+# Push schema directly to database (bypasses migrations)
+pnpm db:push
+
+# Seed with sample data (optional)  
+pnpm db:seed
+```
+
+### Docker Development Setup
+
+#### Starting the Stack
+```bash
+# Start all services (PostgreSQL + Drizzle Gateway)
+docker-compose up -d
+
+# View service status
+docker-compose ps
+
+# View logs
+docker-compose logs postgres
+docker-compose logs drizzle-gateway
+```
+
+#### Stopping the Stack
+```bash
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (WARNING: destroys all data)
+docker-compose down -v
+```
+
+### First Time Setup (Any Environment)
+
+1. **Database Setup**
+   With Docker, the database is automatically created. For local PostgreSQL:
+   ```bash
+   # Using psql (if PostgreSQL is installed locally)
+   createdb devdb
+   
+   # Or connect to your cloud database provider
+   # Update DATABASE_URL in .env with your connection string
+   ```
+
+2. **Set Up Schema**
+   ```bash
+   # Generate initial migration files
+   pnpm db:generate
+   
+   # Apply migrations to create tables
+   pnpm db:migrate
+   ```
+
+3. **Add Sample Data**
+   ```bash
+   # Populate database with test data
+   pnpm db:seed
+   ```
+
+### Sample Data Overview
+
+Running `pnpm db:seed` creates:
+
+- **2 Roles**: `admin`, `user`  
+
+### Database Management
+
+#### View Database
+
+**With Docker (Recommended)**:
+```bash
+# Drizzle Gateway is automatically available via Docker
+# Opens at http://localhost:4983
+open http://localhost:4983
+```
+
+**Without Docker**:
+```bash
+# Open Drizzle Studio - visual database browser
+pnpm db:studio
+# Opens at http://localhost:4983
+```
+
+#### Reset Database (Development)
+```bash
+# WARNING: This destroys all data
+pnpm db:drop
+
+# Recreate schema
+pnpm db:migrate
+
+# Add sample data
+pnpm db:seed
+```
+
+#### Migration vs Push
+
+| Command | Use Case | Description |
+|---------|----------|-------------|
+| `db:migrate` | **Production** | Applies versioned migrations, maintains history |
+| `db:push` | **Development** | Direct schema sync, no migration files |
+
+### Troubleshooting
+
+#### "relation does not exist" Error
+```bash
+# This means tables haven't been created yet
+# Solution: Run migrations first
+pnpm db:migrate
+pnpm db:seed
+```
+
+#### Database Connection Errors
+
+**Docker Environment**:
+1. Check if Docker containers are running: `docker-compose ps`
+2. Restart services: `docker-compose restart postgres`
+3. Check container logs: `docker-compose logs postgres`
+4. Verify your `.env` uses: `postgresql://devuser:devpass@localhost:5432/devdb`
+
+**Local PostgreSQL**:
+1. Check your `DATABASE_URL` in `.env`
+2. Ensure PostgreSQL service is running
+3. Verify database exists and credentials are correct
+
+#### Migration Conflicts
+```bash
+# Reset and start fresh (loses all data)
+pnpm db:drop
+pnpm db:generate  
+pnpm db:migrate
+pnpm db:seed
+```
+
+#### Environment Variables Not Loaded
+The seed script automatically loads `.env` file. Ensure your `.env` contains:
+
+**Docker Development**:
+```env
+NODE_ENV=development
+DATABASE_URL=postgresql://devuser:devpass@localhost:5432/devdb
+```
+
+**Local PostgreSQL**:
+```env
+NODE_ENV=development
+DATABASE_URL=postgresql://your-username:your-password@localhost:5432/devdb
+```
+
+#### Docker Networking Notes
+- **App Connection**: Uses `localhost:5432` (host machine to container port mapping)
+- **Drizzle Gateway Connection**: Uses `postgres:5432` (container-to-container networking)
+- **Credentials**: Both use `devuser:devpass` for database `devdb`
+
+## 📋 Development Commands
 
 ```bash
 # Development
-bun run dev              # Start frontend + backend (concurrently)
-bun run dev:frontend     # Start Vite dev server only (port 3000)
-bun run dev:server       # Start Elysia backend only with watch (port 3001)
-
-# Build
-bun run build            # Build frontend
-bun run build:all        # Build frontend + generate Prisma client
-
-# Production
-bun run start            # Start production server (single port 3001)
+pnpm dev              # Start development server with Turbo
+pnpm build            # Build for production
+pnpm start            # Start production server
+pnpm preview          # Build and start production server
 
 # Database
-bun run db:generate      # Regenerate Prisma client + prismabox schemas
-bun run db:push          # Push schema changes to database
-bun run db:studio        # Open Prisma Studio
+pnpm db:generate      # Generate migration files from schema
+pnpm db:migrate       # Apply migrations to create/update tables
+pnpm db:push          # Push schema directly (development only)
+pnpm db:studio        # Open Drizzle Studio (database GUI)
+pnpm db:seed          # Seed database with sample data
+pnpm db:drop          # Drop all database tables (destructive)
 
-# Testing
-bun run test             # Run tests with Vitest
+# Code Quality
+pnpm lint             # Run ESLint
+pnpm lint:fix         # Fix ESLint errors
+pnpm typecheck        # Run TypeScript check
+pnpm check            # Run lint + typecheck together
+
+# Formatting
+pnpm format:check     # Check Prettier formatting
+pnpm format:write     # Apply Prettier formatting
 ```
 
-## Environment Variables
+## 🏛️ Design Patterns
 
-| Variable | Description | Default |
-|---|---|---|
-| `DATABASE_URL` | SQLite database path | `file:./dev.db` |
-| `BETTER_AUTH_SECRET` | Auth secret (min 32 chars in production) | — |
-| `BETTER_AUTH_URL` | Backend URL for auth | `http://localhost:3001` |
-| `NODE_ENV` | Environment (`development` / `production`) | `development` |
+This template follows enterprise-grade design patterns documented in [`docs/repo-architecture.md`](docs/repo-architecture.md).
 
-## Key Patterns
+### Core Principles
 
-### Adding a New Backend Module
+1. **Single Source of Truth** - Types derive from database entities
+2. **Dedicated Methods** - Explicit operations over generic CRUD
+3. **Repository Validation** - Single validation point at data boundary
+4. **Service Abstraction** - Database-agnostic business logic
 
-1. Add models to `prisma/schema.prisma`, run `bun run db:generate`
-2. Create `server/modules/<name>/` with repository, service, routes, errors
-3. Import prismabox schemas for route validation (`generated/prismabox/<Model>.ts`)
-4. Register service in `server/context/app-context.ts`
-5. Mount routes in `server/index.ts`: `.use(create<Name>Routes(container))`
+### Example: Todo Repository Pattern
 
-### Adding a New Frontend Feature
+```typescript
+// Domain Model (strings)
+interface Todo {
+  id: string;
+  title: string;
+  completed: boolean;
+  userId: string;
+}
 
-1. Create `app/features/<name>/` with components and hooks
-2. Hooks use Eden client + React Query (types inferred from server)
-3. Export via barrel `index.ts`
-4. Import in routes: `import { Component } from '#/features/<name>'`
+// Database Entity (UUIDs)  
+interface DbTodoEntity {
+  id: string;
+  title: string;
+  completed: boolean;
+  userId: string;
+}
 
-### Type Rules
+// Repository Interface (domain types)
+interface ITodoRepository {
+  create(input: TodoCreateData, context: RepositoryContext): Promise<Todo>;
+  updateContent(id: string, input: TodoContentUpdate, userId: string): Promise<void>;
+  updateStatus(id: string, input: TodoStatusUpdate, userId: string): Promise<void>;
+}
 
-- Database model types come from Prisma — never declare manual interfaces
-- Route validation schemas come from prismabox — never write manual `t.Object()`
-- Frontend types are inferred from Eden — never duplicate server types
+// Service Layer (business logic)
+class TodoService {
+  async createTodo(userId: string, request: CreateTodoRequest): Promise<Todo> {
+    // Business validation and logic
+    const context = createRepositoryContext(userId);
+    return this.todoRepository.create(request, context);
+  }
+}
+```
 
-## Deployment
+## 🔐 Authentication
 
-### Docker
+Built-in authentication system with **Better Auth**:
 
+- **Email/Password** authentication
+- **Session Management** with secure cookies
+- **Protected Routes** with middleware
+- **User Context** propagation throughout the app
+
+### Usage Example
+```typescript
+// Client-side
+import { useSession, signIn, signOut } from '~/lib/auth-client';
+
+function MyComponent() {
+  const { data: session, isPending } = useSession();
+  
+  if (session?.user) {
+    return <div>Hello, {session.user.name}!</div>;
+  }
+  
+  return <button onClick={() => signIn.email(credentials)}>Sign In</button>;
+}
+```
+
+## 📊 Database Schema
+
+### Users Table
+```typescript
+interface DbUserEntity {
+  id: string;          // UUID primary key (auto-generated)
+  email: string;       // Unique email address
+  name: string;        // User display name
+  bio?: string;        // Optional user biography
+  avatar?: string;     // Optional avatar URL
+  website?: string;    // Optional website URL
+  // Auto-managed timestamps
+  createdAt: Date;     // Auto-set on creation
+  updatedAt: Date;     // Auto-updated on changes
+}
+```
+
+### Roles Table
+```typescript
+interface DbRoleEntity {
+  id: string;          // UUID primary key (auto-generated)
+  name: string;        // Unique role name (e.g., 'admin', 'user')
+  description?: string; // Optional role description
+  // Auto-managed timestamps
+  createdAt: Date;     // Auto-set on creation
+  updatedAt: Date;     // Auto-updated on changes
+}
+```
+
+### User Roles Junction Table
+```typescript
+interface DbUserRoleEntity {
+  id: string;          // UUID primary key (auto-generated)
+  userId: string;      // Foreign key to users.id
+  roleId: string;      // Foreign key to roles.id
+  // Auto-managed timestamps
+  createdAt: Date;     // Auto-set on creation
+  updatedAt: Date;     // Auto-updated on changes
+  // Unique constraint on (userId, roleId)
+}
+```
+
+### Todos Table
+```typescript  
+interface DbTodoEntity {
+  id: string;          // UUID primary key (auto-generated)
+  title: string;       // Todo title
+  description?: string; // Optional todo description
+  completed: boolean;  // Completion status
+  userId: string;      // Foreign key to users.id
+  // Auto-managed timestamps
+  createdAt: Date;     // Auto-set on creation
+  updatedAt: Date;     // Auto-updated on changes
+}
+```
+
+### Domain Models (Service Layer)
+
+The service layer works with normalized domain models:
+
+```typescript
+interface User {
+  id: string;          // String representation of UUID
+  email: string;
+  name: string;
+  roles: string[];     // Array of role names (e.g., ['admin', 'user'])
+  bio?: string;
+  avatar?: string;
+  website?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Database Features
+
+- **UUID Primary Keys**: All tables use UUID for primary keys
+- **Automatic Timestamps**: `createdAt` and `updatedAt` managed automatically
+- **Normalized Roles**: Many-to-many relationship between users and roles
+- **Foreign Key Constraints**: Referential integrity enforced
+- **Unique Constraints**: Email uniqueness, role name uniqueness, user-role pairs
+
+## 🚀 Deployment
+
+### Production Build
 ```bash
-docker build -t todo-app .
-docker run -p 3001:3001 todo-app
+pnpm build
 ```
 
-The Dockerfile uses multi-stage builds: install deps, build frontend + Prisma, run single Elysia server serving both API and static files.
-
-### Production Environment
-
+### Environment Variables
+Set these in your production environment:
 ```env
 NODE_ENV="production"
-DATABASE_URL="file:./prod.db"
-BETTER_AUTH_SECRET="secure-production-secret-at-least-32-chars"
-BETTER_AUTH_URL="https://yourdomain.com"
+DATABASE_URL="postgresql://user:pass@host:5432/dbname"
+BETTER_AUTH_SECRET="secure-production-secret"
+NEXT_PUBLIC_BETTER_AUTH_URL="https://yourdomain.com/api/auth"
 ```
 
-## Documentation
+### Hosting Options
 
-- **[Architecture Guide](docs/ARCHITECTURE.md)** — Module structure, DI patterns, type safety chain
-- **[AGENTS.md](AGENTS.md)** — AI development guidelines and chief-agent framework
+#### Vercel (Recommended)
+```bash
+pnpm dlx vercel
+```
 
-## License
+#### Railway
+```bash
+pnpm dlx @railway/cli deploy
+```
 
-This project is licensed under the MIT License.
+#### Docker
+```bash
+docker build -t todo-app .
+docker run -p 3000:3000 todo-app
+```
+
+## 🛠️ Customization
+
+### Adding New Features
+
+1. **Define Domain Model** in `~/server/domain/models/`
+2. **Create Database Entity** in `~/server/infrastructure/entities/`
+3. **Build Repository Interface** in `~/server/domain/repositories/`
+4. **Implement Repository** in `~/server/infrastructure/repositories/`
+5. **Create Service Layer** in `~/server/services/`
+6. **Add tRPC Router** in `~/server/api/routers/`
+7. **Build UI Components** in `~/app/_components/`
+
+### Template Structure
+```
+├── Authentication System ✅
+├── Todo CRUD Operations ✅  
+├── Real-time Updates ✅
+├── Responsive UI ✅
+├── Production Logging ✅
+├── Type Safety ✅
+```
+
+## 📚 Documentation
+
+- **[Entity Architecture Guide](docs/repo-architecture.md)** - Repository pattern details
+- **[CLAUDE.md](CLAUDE.md)** - AI development guidelines
+- **[API Documentation](#)** - tRPC endpoint reference (generated)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes following the established patterns
+4. Run quality checks: `pnpm check`
+5. Commit your changes: `git commit -m 'Add amazing feature'`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [T3 Stack](https://create.t3.gg/) foundation
+- UI components by [Mantine](https://mantine.dev)
+- Database ORM by [Drizzle](https://orm.drizzle.team)
+- Authentication by [Better Auth](https://www.better-auth.com)
+
+---
+
+**Made with ❤️ for modern web development**
+
+*This template represents production-ready patterns and can be used as a foundation for enterprise applications.*

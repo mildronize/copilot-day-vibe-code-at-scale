@@ -1,28 +1,41 @@
-FROM oven/bun:1 AS base
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.15.5 --activate
+
+# --- Dependencies ---
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# --- Build ---
+FROM base AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_BETTER_AUTH_URL
+ARG NEXT_PUBLIC_COMMIT_SHA
+ENV NEXT_PUBLIC_BETTER_AUTH_URL=$NEXT_PUBLIC_BETTER_AUTH_URL
+ENV NEXT_PUBLIC_COMMIT_SHA=$NEXT_PUBLIC_COMMIT_SHA
+ENV SKIP_ENV_VALIDATION=1
+
+RUN pnpm build
+
+# --- Production ---
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Install dependencies
-FROM base AS deps
-COPY package.json bun.lock ./
-COPY prisma ./prisma
-COPY prisma.config.ts ./
-RUN bun install --frozen-lockfile
-
-# Build frontend + generate prisma
-FROM deps AS build
-COPY . .
-RUN bun run build:all
-
-# Production
-FROM base AS production
-COPY --from=build /app/package.json /app/bun.lock ./
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/server ./server
-COPY --from=build /app/generated ./generated
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/prisma.config.ts ./
-COPY --from=build /app/app/dist ./app/dist
-
 ENV NODE_ENV=production
-EXPOSE 3001
-CMD ["bun", "run", "server/index.ts"]
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+
+# Copy standalone server
+COPY --from=build /app/.next/standalone ./
+# Copy static assets
+COPY --from=build /app/.next/static ./.next/static
+# Copy public assets
+COPY --from=build /app/public ./public
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
