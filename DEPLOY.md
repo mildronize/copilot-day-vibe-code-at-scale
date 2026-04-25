@@ -3,140 +3,136 @@
 ## Prerequisites
 
 - Bun 1.3+
-- Docker (for local image sanity checks if needed)
+- Docker
 - Terraform 1.6+
-- Azure CLI (`az`) and an Azure subscription
-- GitHub repository with Actions enabled and permission to push packages to GHCR
+- Azure CLI (`az`)
+- Azure subscription permissions to create resources and RBAC assignments
+- GitHub repository with Actions enabled
+- GHCR image must be pullable by Azure Container Apps (public package or configured registry auth)
 
-## Required GitHub Secrets
+## Correct Setup Order (Important)
 
-Configure these repository secrets before using CI deployment.
+For this repository, use this order:
 
-For details on setting secrets, see [GitHub docs](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+1. Run Terraform manually first (creates `rg-copilot-vibe`, `aca-copilot-vibe`, PostgreSQL server/database).
+2. Create service principal scoped to the created resource group.
+3. Create GitHub secrets (`AZURE_CREDENTIALS`, `DATABASE_URL`).
+4. Ensure Azure Container App can pull the GHCR image.
+5. Push to `main` to trigger deployment workflow.
 
-### AZURE_CREDENTIALS
-
-Azure service principal credentials JSON used by `azure/login@v2`.
-
-**To create:**
-1. Install or ensure Azure CLI is available:
-   ```bash
-   az --version
-   ```
-2. Create a service principal with RBAC assignment to your resource group:
-   ```bash
-   az ad sp create-for-rbac --name "github-actions-sp" \
-     --role Contributor \
-     --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-copilot-vibe
-   ```
-3. Copy the output JSON (contains `clientId`, `clientSecret`, `subscriptionId`, `tenantId`).
-4. Store in GitHub repository secrets as `AZURE_CREDENTIALS`:
-   - Go to repository **Settings** → **Secrets and variables** → **Actions**
-   - Click **New repository secret**
-   - Name: `AZURE_CREDENTIALS`
-   - Value: Paste the JSON output from step 2
-
-### DATABASE_URL
-
-PostgreSQL connection string used by Prisma migration step.
-
-**Format:**
-```
-postgresql://<db_admin>:<db_admin_password>@<server-host>:5432/<database_name>?schema=public
-```
-
-**To obtain after Terraform apply:**
-1. Run `terraform output` in the `terraform/` directory to see PostgreSQL host and database name.
-2. Use the `db_admin` username and `db_admin_password` you provided to `terraform apply`.
-3. Compose the connection string:
-   ```
-   postgresql://postgres:mypassword@copilot-vibe-db.postgres.database.azure.com:5432/copilot_vibe_db?schema=public
-   ```
-4. Store in GitHub repository secrets as `DATABASE_URL`:
-   - Go to repository **Settings** → **Secrets and variables** → **Actions**
-   - Click **New repository secret**
-   - Name: `DATABASE_URL`
-   - Value: Paste your PostgreSQL connection string
-
-> Do not commit secret values in repository files.
+This ordering avoids RBAC scope errors when creating a service principal scoped to `rg-copilot-vibe`.
 
 ## Manual Terraform Apply (outside CI)
 
 Terraform is intentionally manual in milestone 1.
 
 1. Initialize:
-   - `cd terraform`
-   - `terraform init`
-
+   ```bash
+   cd terraform
+   terraform init
+   ```
 2. Create variables file:
-   - Copy `terraform.tfvars.example` to `terraform.tfvars`:
-     ```bash
-     cp terraform.tfvars.example terraform.tfvars
-     ```
-   - Edit `terraform.tfvars` and set `db_admin_password` to a strong password
-   - Note: `terraform.tfvars` is in `.gitignore` and will NOT be committed
-
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+   Set a strong password in `terraform.tfvars`:
+   ```hcl
+   db_admin_password = "<strong-password>"
+   ```
 3. Review plan:
-   - `terraform plan`
-
+   ```bash
+   terraform plan
+   ```
 4. Apply:
-   - `terraform apply`
+   ```bash
+   terraform apply
+   ```
+5. Confirm resources exist in Azure:
+   - Resource group: `rg-copilot-vibe`
+   - Container App: `aca-copilot-vibe`
+   - PostgreSQL Flexible Server: `psqlflex-copilot-vibe`
+   - PostgreSQL database: `app-copilot-vibe`
 
-5. Confirm created resources (resource group, container apps environment, container app, PostgreSQL flexible server, database).
+## Required GitHub Secrets
+
+After Terraform apply, configure these secrets in repository **Settings** → **Secrets and variables** → **Actions**.
+
+### AZURE_CREDENTIALS
+
+Used by `azure/login@v2` in `.github/workflows/deploy.yml`.
+
+Create service principal scoped to the resource group created by Terraform:
+
+```bash
+az ad sp create-for-rbac --name "github-actions-sp-copilot-vibe" \
+  --role Contributor \
+  --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-copilot-vibe
+```
+
+Save the returned JSON as secret `AZURE_CREDENTIALS`.
+
+### DATABASE_URL
+
+Used by migration stage (`bunx prisma migrate deploy`).
+
+Format:
+
+```text
+postgresql://copilotadmin:<db_admin_password>@psqlflex-copilot-vibe.postgres.database.azure.com:5432/app-copilot-vibe?schema=public&sslmode=require
+```
+
+Save this as secret `DATABASE_URL`.
+
+> Do not commit secret values or real credentials to the repository.
+
+## GHCR Pull Access for Azure Container Apps
+
+`az containerapp update --image ghcr.io/...` only updates image reference. The app still needs pull access.
+
+Choose one:
+
+1. Make the GHCR package public (simplest for milestone 1), or
+2. Configure registry credentials on the Container App before first deploy.
 
 ## GitHub Actions Workflow Behavior
 
-Workflow file: `.github/workflows/deploy.yml`  
+Workflow: `.github/workflows/deploy.yml`  
 Trigger: push to `main`
 
-Strict stage order:
+Stage order:
 
-1. **Build and push image**
-   - Builds Docker image from repo root.
-   - Pushes image to `ghcr.io/<owner>/<repo>:<commit-sha>`.
-2. **Run database migration**
-   - Uses `DATABASE_URL` secret.
-   - Runs `bunx prisma migrate deploy`.
-3. **Deploy to Azure Container App**
-   - Logs in using `azure/login@v2` and `AZURE_CREDENTIALS`.
-   - Updates Container App image (`aca-copilot-vibe` in `rg-copilot-vibe`).
+1. Build and push image to GHCR (`ghcr.io/<owner>/<repo>:<sha>`)
+2. Run database migrations with `DATABASE_URL`
+3. Deploy new image to Container App using `AZURE_CREDENTIALS`
 
 `terraform apply` is **not** executed by CI.
 
 ## Rollback
 
-If a deployment fails or a release must be reverted:
-
-1. Find the previous known-good image in GHCR.
-2. Update Container App image manually:
-   - `az containerapp update --name aca-copilot-vibe --resource-group rg-copilot-vibe --image ghcr.io/<owner>/<repo>:<previous-sha>`
-3. If migration introduced issues, restore database from backup or apply a forward fix migration.
+1. Find previous working image tag in GHCR.
+2. Update Container App:
+   ```bash
+   az containerapp update \
+     --name aca-copilot-vibe \
+     --resource-group rg-copilot-vibe \
+     --image ghcr.io/<owner>/<repo>:<previous-sha>
+   ```
+3. If migration caused issues, restore from backup or apply a forward-fix migration.
 
 ## Troubleshooting
 
-- **Migration step fails**: verify `DATABASE_URL` secret format, host reachability, credentials, and database permissions.
-- **Azure login fails**: verify `AZURE_CREDENTIALS` JSON is valid and service principal has required RBAC on resource group.
-- **Deploy step fails**: verify Container App/resource group names (`aca-copilot-vibe`, `rg-copilot-vibe`) match your Terraform-provisioned resources.
-- **Image pull issues**: verify image exists in GHCR and authentication/permissions are correct for Azure to pull the image.
+- **RBAC/service principal creation fails**: run Terraform apply first so `rg-copilot-vibe` exists.
+- **Migration fails**: recheck `DATABASE_URL` format, password, host, db name, and connectivity.
+- **Azure login fails**: verify `AZURE_CREDENTIALS` JSON and RBAC scope.
+- **Deploy step fails**: verify app/resource group names match Terraform resources.
+- **Container app cannot pull image**: verify GHCR visibility/permissions for the deployed image.
 
 ## Verification Checklist
 
-After completing all setup steps, use this checklist to validate your deployment is ready:
-
-- [ ] **Prerequisites installed**: Bun, Docker, Terraform, Azure CLI are available in your PATH
-- [ ] **Azure subscription & permissions**: You have owner/contributor role on your Azure subscription
-- [ ] **GitHub repo access**: You have admin or write access to push to `main` branch
-- [ ] **AZURE_CREDENTIALS secret set**: In repository **Settings** → **Secrets and variables** → **Actions**
-- [ ] **DATABASE_URL secret set**: In repository **Settings** → **Secrets and variables** → **Actions**
-- [ ] **Terraform initialized**: Ran `terraform init` in `terraform/` directory
-- [ ] **Terraform plan reviewed**: Ran `terraform plan` and verified resource names and configuration
-- [ ] **Terraform apply completed**: Ran `terraform apply` successfully; resources exist in Azure portal
-- [ ] **PostgreSQL server running**: Verified in Azure portal that PostgreSQL Flexible Server is running
-- [ ] **Container App created**: Verified in Azure portal that Container App `aca-copilot-vibe` exists in resource group `rg-copilot-vibe`
-- [ ] **GHCR access verified**: Ensured service principal has push permissions to GHCR
-- [ ] **Test deployment triggered**: Pushed a test commit to `main` branch
-- [ ] **GitHub Actions triggered**: Workflow ran successfully in **Actions** tab
-- [ ] **Docker image pushed**: New image visible in GHCR packages
-- [ ] **Container app updated**: New image deployed to Container App (verify in Azure portal or CLI)
-
-If all items are checked, your deployment pipeline is operational.
+- [ ] Terraform apply completed successfully
+- [ ] `rg-copilot-vibe`, `aca-copilot-vibe`, `psqlflex-copilot-vibe`, and `app-copilot-vibe` exist
+- [ ] `AZURE_CREDENTIALS` secret configured
+- [ ] `DATABASE_URL` secret configured
+- [ ] Push to `main` triggers workflow
+- [ ] Workflow succeeds in build → migrate → deploy order
+- [ ] Container App revision uses latest GHCR image
