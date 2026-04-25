@@ -15,7 +15,7 @@ permissions:
   packages: write
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -68,23 +68,31 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm db:migrate
 
-  deploy-container-app:
-    name: Deploy image to Azure Container App
+  # ---------------------------------------------------------------------------
+  # Deploy Container App (after build)
+  # ---------------------------------------------------------------------------
+  deploy:
     runs-on: ubuntu-latest
-    needs:
-      - build-and-push
-      - migrate
+    needs: [build]
+    env:
+      CONTAINER_APP_REVISION_SUFFIX: gh-actions-${{ github.run_id }}-${{ github.run_attempt }}
+
     steps:
-      - name: Azure login
+      - name: Login to Azure
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy latest image revision
-        uses: azure/cli@v2
+      - name: Deploy image to Azure Container App with Revision Suffix
+        uses: azure/CLI@v1
         with:
+          azcliversion: 2.72.0
           inlineScript: |
+            IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            IMAGE=$(echo $IMAGE | tr '[:upper:]' '[:lower:]')
             az containerapp update \
-              --name aca-copilot-vibe \
-              --resource-group rg-copilot-vibe \
-              --image ${{ needs.build-and-push.outputs.image }}
+              --name ${{ vars.AZURE_CONTAINER_APP_NAME }} \
+              --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+              --image $IMAGE:latest \
+              --revision-suffix ${{ env.CONTAINER_APP_REVISION_SUFFIX }}
+
