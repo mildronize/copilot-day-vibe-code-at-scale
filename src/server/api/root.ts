@@ -1,5 +1,6 @@
 import { userRouter } from "~/server/api/routers/user";
 import { todoRouter } from "~/server/api/routers/todo";
+import { expenseRouter } from "~/server/api/routers/expense";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -10,6 +11,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 export const appRouter = createTRPCRouter({
   user: userRouter,
   todo: todoRouter,
+  expense: expenseRouter,
 });
 
 // export type definition of API

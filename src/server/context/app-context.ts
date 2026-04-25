@@ -2,9 +2,13 @@ import type { ILogger } from '@thaitype/core-utils';
 import { createLogger } from '~/server/infrastructure/logging/logger-factory';
 import type { AppConfig } from '~/server/config/types';
 import { createAppConfig } from '~/server/config/types';
-import { UserService, TodoService } from '~/server/services';
-import type { IUserRepository, ITodoRepository } from '~/server/domain/repositories';
-import { DrizzleTodoRepository, DrizzleUserRepository } from '~/server/infrastructure/repositories';
+import { ExpenseService, UserService, TodoService } from '~/server/services';
+import type { IExpenseRepository, IUserRepository, ITodoRepository } from '~/server/domain/repositories';
+import {
+  DrizzleExpenseRepository,
+  DrizzleTodoRepository,
+  DrizzleUserRepository,
+} from '~/server/infrastructure/repositories';
 import { initializeDatabaseConfig as initDbConfig } from '~/server/lib/db';
 import { env } from '~/env';
 
@@ -24,6 +28,7 @@ export interface ServiceContainer {
   appContext: AppContext;
   userService: UserService;
   todoService: TodoService;
+  expenseService: ExpenseService;
 }
 
 /**
@@ -59,14 +64,17 @@ export async function createContainer(): Promise<ServiceContainer> {
   // Create repositories (Drizzle will handle database connection internally)
   const todoRepository: ITodoRepository = new DrizzleTodoRepository(appContext);
   const userRepository: IUserRepository = new DrizzleUserRepository(appContext);
+  const expenseRepository: IExpenseRepository = new DrizzleExpenseRepository(appContext);
 
   // Create services
   const userService = new UserService(appContext, userRepository);
   const todoService = new TodoService(appContext, todoRepository);
+  const expenseService = new ExpenseService(appContext, expenseRepository);
 
   return {
     appContext,
     userService,
     todoService,
+    expenseService,
   };
 }
