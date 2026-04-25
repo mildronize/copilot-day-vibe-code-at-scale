@@ -72,3 +72,4 @@ terraform/.terraform.lock.hcl
 terraform/terraform.tfstate*
 terraform/out.txt
 terraform/tfplan
+terraform/.terraform.tfstate.lock.info

@@ -6,7 +6,7 @@ locals {
   container_app_environment_name = "acae-${local.suffix}"
   log_analytics_workspace_name   = "law-${local.suffix}"
   container_app_name             = "aca-${local.suffix}"
-  container_app_target_port      = 3001
+  container_app_target_port      = 3000
   postgresql_server_name         = "psqlflex-${local.suffix}"
   postgresql_server_fqdn         = "${local.postgresql_server_name}.postgres.database.azure.com"
   postgresql_database_name       = "app-${local.suffix}"
