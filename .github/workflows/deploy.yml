@@ -91,8 +91,8 @@ jobs:
             IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             IMAGE=$(echo $IMAGE | tr '[:upper:]' '[:lower:]')
             az containerapp update \
-              --name ${{ vars.AZURE_CONTAINER_APP_NAME }} \
-              --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+              --name aca-copilot-vibe \
+              --resource-group rg-copilot-vibe \
               --image $IMAGE:latest \
               --revision-suffix ${{ env.CONTAINER_APP_REVISION_SUFFIX }}
 
