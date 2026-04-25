@@ -84,6 +84,8 @@ postgresql://copilotadmin:<db_admin_password>@psqlflex-copilot-vibe.postgres.dat
 Save this as secret `DATABASE_URL`.
 
 > Do not commit secret values or real credentials to the repository.
+>
+> Terraform also injects the same `DATABASE_URL` into the Azure Container App as a runtime secret-backed environment variable. For this project, `BETTER_AUTH_*` is intentionally not part of the Azure runtime env setup.
 
 ## GHCR Pull Access for Azure Container Apps
 
