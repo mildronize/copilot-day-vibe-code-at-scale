@@ -1,0 +1,7 @@
+# Terraform variables example
+# Copy this file to terraform.tfvars and fill in your values
+# NOTE: terraform.tfvars is in .gitignore - do NOT commit it
+
+# PostgreSQL administrator password
+# Use a strong password (min 8 characters, mix of uppercase, lowercase, numbers, symbols)
+db_admin_password = "ChangeMe@SecurePassword123"

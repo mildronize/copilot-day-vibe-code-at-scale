@@ -67,11 +67,22 @@ Terraform is intentionally manual in milestone 1.
 1. Initialize:
    - `cd terraform`
    - `terraform init`
-2. Review plan:
-   - `terraform plan -var="db_admin_password=<your-password>"`
-3. Apply:
-   - `terraform apply -var="db_admin_password=<your-password>"`
-4. Confirm created resources (resource group, container apps environment, container app, PostgreSQL flexible server, database).
+
+2. Create variables file:
+   - Copy `terraform.tfvars.example` to `terraform.tfvars`:
+     ```bash
+     cp terraform.tfvars.example terraform.tfvars
+     ```
+   - Edit `terraform.tfvars` and set `db_admin_password` to a strong password
+   - Note: `terraform.tfvars` is in `.gitignore` and will NOT be committed
+
+3. Review plan:
+   - `terraform plan`
+
+4. Apply:
+   - `terraform apply`
+
+5. Confirm created resources (resource group, container apps environment, container app, PostgreSQL flexible server, database).
 
 ## GitHub Actions Workflow Behavior
 

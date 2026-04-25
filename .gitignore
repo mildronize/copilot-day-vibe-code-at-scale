@@ -16,3 +16,9 @@ _ref
 
 *.db
 generated
+
+# Terraform secrets and state
+terraform.tfvars
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate*
