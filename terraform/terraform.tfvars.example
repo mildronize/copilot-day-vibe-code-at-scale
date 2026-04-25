@@ -5,3 +5,9 @@
 # PostgreSQL administrator password
 # Use a strong password (min 8 characters, mix of uppercase, lowercase, numbers, symbols)
 db_admin_password = "ChangeMe@SecurePassword123"
+
+# Better Auth secret key (generate a strong random string for production)
+better_auth_secret = "your-secret-key-change-in-production"
+
+# Public URL of the deployed application (e.g. https://aca-copilot-vibe.<region>.azurecontainerapps.io)
+better_auth_url = "https://your-app-url.azurecontainerapps.io"

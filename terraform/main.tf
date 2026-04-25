@@ -45,6 +45,11 @@ resource "azurerm_container_app" "main" {
     value = local.database_url
   }
 
+  secret {
+    name  = "better-auth-secret"
+    value = var.better_auth_secret
+  }
+
   template {
     container {
       name   = "app"
@@ -58,8 +63,23 @@ resource "azurerm_container_app" "main" {
       }
 
       env {
+        name  = "PORT"
+        value = tostring(local.container_app_target_port)
+      }
+
+      env {
         name        = "DATABASE_URL"
         secret_name = "database-url"
+      }
+
+      env {
+        name        = "BETTER_AUTH_SECRET"
+        secret_name = "better-auth-secret"
+      }
+
+      env {
+        name  = "NEXT_PUBLIC_BETTER_AUTH_URL"
+        value = var.better_auth_url
       }
     }
     min_replicas = 1
