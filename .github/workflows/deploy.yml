@@ -5,6 +5,9 @@ on:
     branches:
       - main.fix-code
 
+env:
+  NODE_VERSION: "20"
+  
 permissions:
   contents: read
   packages: write
@@ -59,8 +62,8 @@ jobs:
 
       - name: Run database migrations
         env:
+          NODE_ENV: production
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
         run: pnpm db:migrate
 
   deploy-container-app:
