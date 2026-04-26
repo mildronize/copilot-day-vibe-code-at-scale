@@ -8,6 +8,7 @@ A production-ready **Todo Application Template** built with Next.js 15, implemen
 
 - 🔐 **Authentication System** - Better Auth with email/password
 - 📝 **Todo Management** - Full CRUD operations with real-time updates  
+- 💸 **Expense Tracker (M1)** - Add/list/delete expenses with category filter and filtered totals
 - 🎨 **Modern UI** - Mantine components with responsive design
 - 🏗️ **Enterprise Architecture** - Entity-based repository pattern
 - 🔒 **Type Safety** - Full TypeScript with tRPC API layer
@@ -153,6 +154,23 @@ pnpm dev
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) to see your app!
+
+## 💸 Expense Tracker (Milestone 1)
+
+After signing in, the home page provides a single-page expense tracker with:
+
+- **Add expense**: name, amount, and category
+- **List expenses**: newest first, scoped to the authenticated user
+- **Delete expense**: hard delete per row
+- **Category filter**: `ALL`, `FOOD`, `TRANSPORT`, `SHOPPING`, `BILLS`, `OTHER`
+- **Filtered total**: total spending (`totalCents`) is computed from the currently visible list
+
+### Constraints (M1)
+
+- Categories are fixed (no custom categories)
+- No edit/update flow for existing expenses
+- Amount must be positive with up to 2 decimal places (stored as integer cents)
+- Data is persisted in PostgreSQL and remains available across app restarts
 
 ## 🗄️ Database Setup Guide
 
