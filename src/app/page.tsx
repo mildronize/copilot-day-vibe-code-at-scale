@@ -13,7 +13,7 @@ import {
 } from '@mantine/core';
 import { IconShieldCheck, IconSettings, IconChecklist } from '@tabler/icons-react';
 import { useSession } from '~/lib/auth-client';
-import { TodoList } from './_components/TodoList';
+import { ExpenseTracker } from './_components/ExpenseTracker';
 import { AppHeader } from './_components/AppHeader';
 import Link from 'next/link';
 
@@ -44,11 +44,11 @@ export default function Home() {
                 Welcome back, {session.user.name}!
               </Title>
               <Text c="dimmed" size="sm">
-                Manage your tasks efficiently
+                Track your expenses in one place
               </Text>
             </Stack>
             
-            <TodoList />
+            <ExpenseTracker />
           </Container>
         </AppShell.Main>
       </AppShell>
