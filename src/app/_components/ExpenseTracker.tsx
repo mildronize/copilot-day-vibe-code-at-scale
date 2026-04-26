@@ -18,6 +18,7 @@ import {
   ActionIcon,
   Grid,
 } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
 import { IconInfoCircle, IconRefresh, IconTrash } from '@tabler/icons-react';
 import type { ExpenseCategory } from '~/server/domain/models';
@@ -50,6 +51,9 @@ const formatExpenseDate = (value: Date | string): string => new Date(value).toLo
 const sortNewestFirst = (expenses: ExpenseListItem[]): ExpenseListItem[] =>
   [...expenses].sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime());
 
+const computeTotalCents = (expenses: ExpenseListItem[]): number =>
+  expenses.reduce((sum, expense) => sum + expense.amountCents, 0);
+
 export function ExpenseTracker() {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
@@ -59,12 +63,12 @@ export function ExpenseTracker() {
   const { expensesQuery, createExpenseMutation, deleteExpenseMutation, refreshExpenses } =
     useExpenseTracker(filter);
 
-  const totalCents = expensesQuery.data?.totalCents ?? 0;
-  const visibleCount = expensesQuery.data?.count ?? 0;
   const sortedExpenses = useMemo(
     () => sortNewestFirst(expensesQuery.data?.expenses ?? []),
     [expensesQuery.data?.expenses],
   );
+  const totalCents = useMemo(() => computeTotalCents(sortedExpenses), [sortedExpenses]);
+  const visibleCount = sortedExpenses.length;
 
   const handleCreateExpense = async () => {
     const trimmedName = name.trim();
@@ -130,6 +134,23 @@ export function ExpenseTracker() {
         color: 'red',
       });
     }
+  };
+
+  const handleDeleteClick = (expense: ExpenseListItem) => {
+    modals.openConfirmModal({
+      title: 'Delete expense?',
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you sure you want to delete <Text span fw={600}>{expense.name}</Text>? This action cannot be undone.
+        </Text>
+      ),
+      labels: { confirm: 'Delete', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: () => {
+        void handleDeleteExpense(expense.id);
+      },
+    });
   };
 
   return (
@@ -247,7 +268,7 @@ export function ExpenseTracker() {
                           <ActionIcon
                             color="red"
                             variant="subtle"
-                            onClick={() => void handleDeleteExpense(expense.id)}
+                            onClick={() => handleDeleteClick(expense)}
                             loading={deleteExpenseMutation.isPending}
                             disabled={deleteExpenseMutation.isPending}
                           >
